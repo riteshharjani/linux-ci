@@ -1506,6 +1506,7 @@ static void ext4_update_super(struct super_block *sb,
 			EXT4_NUM_B2C(sbi, blocks_count - free_blocks));
 	else
 		ext4_calculate_overhead(sb);
+
 	es->s_overhead_clusters = cpu_to_le32(sbi->s_overhead);
 
 	if (test_opt(sb, DEBUG))
