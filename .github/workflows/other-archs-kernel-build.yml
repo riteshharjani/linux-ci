@@ -29,7 +29,7 @@ jobs:
           - { arch: "riscv", cross_compile: "riscv64-linux-gnu-", defconfig: "allmodconfig" }
           - { arch: "riscv", cross_compile: "riscv64-linux-gnu-", defconfig: "allyesconfig" }
           - { arch: "s390", cross_compile: "s390x-linux-gnu-", defconfig: "defconfig" }
-            #          - { arch: "mips", cross_compile: "mips-linux-gnu-", defconfig: "defconfig" }
+          - { arch: "mips", cross_compile: "mips-linux-gnu-", defconfig: "defconfig" }
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -46,7 +46,7 @@ jobs:
           gcc-s390x-linux-gnu \
           gcc-mips-linux-gnu \
           gcc
-        sudo apt-get install -y build-essential libncurses-dev bison flex libssl-dev bc libelf-dev fakeroot dkms
+        sudo apt-get install -y build-essential libncurses-dev bison flex libssl-dev bc libelf-dev fakeroot dkms u-boot-tools
     - name: Build kernel
       run: |
         make ARCH=${{ matrix.arch_config.arch }} CROSS_COMPILE=${{ matrix.arch_config.cross_compile }} ${{ matrix.arch_config.defconfig }}
