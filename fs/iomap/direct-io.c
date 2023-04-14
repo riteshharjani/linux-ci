@@ -130,6 +130,7 @@ ssize_t iomap_dio_complete(struct iomap_dio *dio)
 	if (ret > 0)
 		ret += dio->done_before;
 
+	trace_iomap_dio_complete(iocb, dio->error, ret);
 	kfree(dio);
 
 	return ret;
@@ -650,8 +651,12 @@ __iomap_dio_rw(struct kiocb *iocb, struct iov_iter *iter,
 	 */
 	dio->wait_for_completion = wait_for_completion;
 	if (!atomic_dec_and_test(&dio->ref)) {
-		if (!wait_for_completion)
-			return ERR_PTR(-EIOCBQUEUED);
+		if (!wait_for_completion) {
+			ret = -EIOCBQUEUED;
+			trace_iomap_dio_rw_queued(iocb, iter, dio_flags,
+						  done_before, ret);
+			return ERR_PTR(ret);
+		}
 
 		for (;;) {
 			set_current_state(TASK_UNINTERRUPTIBLE);
