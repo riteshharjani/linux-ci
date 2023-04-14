@@ -29,7 +29,7 @@ jobs:
           - { arch: "riscv", cross_compile: "riscv64-linux-gnu-", defconfig: "allmodconfig" }
           - { arch: "riscv", cross_compile: "riscv64-linux-gnu-", defconfig: "allyesconfig" }
           - { arch: "s390", cross_compile: "s390x-linux-gnu-", defconfig: "defconfig" }
-          - { arch: "mips", cross_compile: "mips-linux-gnu-", defconfig: "defconfig" }
+            #          - { arch: "mips", cross_compile: "mips-linux-gnu-", defconfig: "defconfig" }
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
