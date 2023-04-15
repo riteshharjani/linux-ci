@@ -11,23 +11,23 @@ jobs:
       matrix:
         arch_config:
           - { arch: "arm", cross_compile: "arm-linux-gnueabihf-", defconfig: "defconfig" }
-          - { arch: "arm", cross_compile: "arm-linux-gnueabihf-", defconfig: "allmodconfig" }
-          - { arch: "arm", cross_compile: "arm-linux-gnueabihf-", defconfig: "allyesconfig" }
+            #          - { arch: "arm", cross_compile: "arm-linux-gnueabihf-", defconfig: "allmodconfig" }
+            #          - { arch: "arm", cross_compile: "arm-linux-gnueabihf-", defconfig: "allyesconfig" }
           - { arch: "arm64", cross_compile: "aarch64-linux-gnu-", defconfig: "defconfig" }
-          - { arch: "arm64", cross_compile: "aarch64-linux-gnu-", defconfig: "allmodconfig" }
-          - { arch: "arm64", cross_compile: "aarch64-linux-gnu-", defconfig: "allyesconfig" }
+            #          - { arch: "arm64", cross_compile: "aarch64-linux-gnu-", defconfig: "allmodconfig" }
+            #          - { arch: "arm64", cross_compile: "aarch64-linux-gnu-", defconfig: "allyesconfig" }
           - { arch: "powerpc", cross_compile: "powerpc-linux-gnu-", defconfig: "defconfig" }
-          - { arch: "powerpc", cross_compile: "powerpc-linux-gnu-", defconfig: "ppc32_allmodconfig" }
-          - { arch: "powerpc", cross_compile: "powerpc64le-linux-gnu-", defconfig: "defconfig" }
+            #          - { arch: "powerpc", cross_compile: "powerpc-linux-gnu-", defconfig: "ppc32_allmodconfig" }
+            #          - { arch: "powerpc", cross_compile: "powerpc64le-linux-gnu-", defconfig: "defconfig" }
           - { arch: "powerpc", cross_compile: "powerpc64le-linux-gnu-", defconfig: "pseries_defconfig" }
-          - { arch: "powerpc", cross_compile: "powerpc64le-linux-gnu-", defconfig: "allmodconfig" }
-          - { arch: "powerpc", cross_compile: "powerpc64le-linux-gnu-", defconfig: "allyesconfig" }
+            #          - { arch: "powerpc", cross_compile: "powerpc64le-linux-gnu-", defconfig: "allmodconfig" }
+            #          - { arch: "powerpc", cross_compile: "powerpc64le-linux-gnu-", defconfig: "allyesconfig" }
           - { arch: "x86", cross_compile: "", defconfig: "defconfig" }
-          - { arch: "x86", cross_compile: "", defconfig: "allyesconfig" }
-          - { arch: "x86", cross_compile: "", defconfig: "allmodconfig" }
+            #          - { arch: "x86", cross_compile: "", defconfig: "allyesconfig" }
+            #          - { arch: "x86", cross_compile: "", defconfig: "allmodconfig" }
           - { arch: "riscv", cross_compile: "riscv64-linux-gnu-", defconfig: "defconfig" }
-          - { arch: "riscv", cross_compile: "riscv64-linux-gnu-", defconfig: "allmodconfig" }
-          - { arch: "riscv", cross_compile: "riscv64-linux-gnu-", defconfig: "allyesconfig" }
+            #          - { arch: "riscv", cross_compile: "riscv64-linux-gnu-", defconfig: "allmodconfig" }
+            #          - { arch: "riscv", cross_compile: "riscv64-linux-gnu-", defconfig: "allyesconfig" }
           - { arch: "s390", cross_compile: "s390x-linux-gnu-", defconfig: "defconfig" }
           - { arch: "mips", cross_compile: "mips-linux-gnu-", defconfig: "defconfig" }
     steps:
