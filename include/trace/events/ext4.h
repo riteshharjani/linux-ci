@@ -560,10 +560,10 @@ TRACE_EVENT(ext4_writepages_result,
 		  (unsigned long) __entry->writeback_index)
 );
 
-DECLARE_EVENT_CLASS(ext4__page_op,
-	TP_PROTO(struct page *page),
+DECLARE_EVENT_CLASS(ext4__folio_op,
+	TP_PROTO(struct folio *folio),
 
-	TP_ARGS(page),
+	TP_ARGS(folio),
 
 	TP_STRUCT__entry(
 		__field(	dev_t,	dev			)
@@ -573,9 +573,9 @@ DECLARE_EVENT_CLASS(ext4__page_op,
 	),
 
 	TP_fast_assign(
-		__entry->dev	= page->mapping->host->i_sb->s_dev;
-		__entry->ino	= page->mapping->host->i_ino;
-		__entry->index	= page->index;
+		__entry->dev	= folio->mapping->host->i_sb->s_dev;
+		__entry->ino	= folio->mapping->host->i_ino;
+		__entry->index	= folio->index;
 	),
 
 	TP_printk("dev %d,%d ino %lu page_index %lu",
@@ -584,25 +584,18 @@ DECLARE_EVENT_CLASS(ext4__page_op,
 		  (unsigned long) __entry->index)
 );
 
-DEFINE_EVENT(ext4__page_op, ext4_writepage,
+DEFINE_EVENT(ext4__folio_op, ext4_read_folio,
 
-	TP_PROTO(struct page *page),
+	TP_PROTO(struct folio *folio),
 
-	TP_ARGS(page)
+	TP_ARGS(folio)
 );
 
-DEFINE_EVENT(ext4__page_op, ext4_readpage,
+DEFINE_EVENT(ext4__folio_op, ext4_release_folio,
 
-	TP_PROTO(struct page *page),
+	TP_PROTO(struct folio *folio),
 
-	TP_ARGS(page)
-);
-
-DEFINE_EVENT(ext4__page_op, ext4_releasepage,
-
-	TP_PROTO(struct page *page),
-
-	TP_ARGS(page)
+	TP_ARGS(folio)
 );
 
 DECLARE_EVENT_CLASS(ext4_invalidate_folio_op,
