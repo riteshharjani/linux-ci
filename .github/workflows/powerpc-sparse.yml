@@ -4,20 +4,23 @@ name: powerpc/sparse
 on:
   # This allows the build to be triggered manually via the github UI.
   workflow_dispatch:
-
   push:
-    # This triggers the build on a push to any branch named ci/powerpc/<something>
     branches:
-    - '**'
-    # As long as one of these paths matches
-    paths:
-      - '!tools/**'		   	# ignore tools
-      - '!samples/**'		   	# ignore samples
-      - '!Documentation/**'		# ignore Documentation
-      - '!arch/**'			# ignore arch changes
-      - 'arch/powerpc/**'		# but not arch/powerpc
-      - 'arch/Kconfig'			# or common bits in arch
-        #      - '**'				# anything else triggers a build
+      - 'kernelci-*'
+
+          #  push:
+          #    # This triggers the build on a push to any branch named ci/powerpc/<something>
+          #    branches:
+          #    - '**'
+          #    # As long as one of these paths matches
+          #    paths:
+          #      - '!tools/**'		   	# ignore tools
+          #      - '!samples/**'		   	# ignore samples
+          #      - '!Documentation/**'		# ignore Documentation
+          #      - '!arch/**'			# ignore arch changes
+          #      - 'arch/powerpc/**'		# but not arch/powerpc
+          #      - 'arch/Kconfig'			# or common bits in arch
+          #        #      - '**'				# anything else triggers a build
 
 jobs:
   sparse:

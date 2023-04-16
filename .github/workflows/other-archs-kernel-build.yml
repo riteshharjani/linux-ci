@@ -2,6 +2,9 @@ name: Other Arch kernel build
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - 'kernelci-*'
 
 jobs:
   build:
@@ -17,7 +20,7 @@ jobs:
             #          - { arch: "arm64", cross_compile: "aarch64-linux-gnu-", defconfig: "allmodconfig" }
             #          - { arch: "arm64", cross_compile: "aarch64-linux-gnu-", defconfig: "allyesconfig" }
           - { arch: "powerpc", cross_compile: "powerpc-linux-gnu-", defconfig: "defconfig" }
-            #          - { arch: "powerpc", cross_compile: "powerpc-linux-gnu-", defconfig: "ppc32_allmodconfig" }
+          - { arch: "powerpc", cross_compile: "powerpc-linux-gnu-", defconfig: "ppc32_allmodconfig" }
             #          - { arch: "powerpc", cross_compile: "powerpc64le-linux-gnu-", defconfig: "defconfig" }
           - { arch: "powerpc", cross_compile: "powerpc64le-linux-gnu-", defconfig: "pseries_defconfig" }
             #          - { arch: "powerpc", cross_compile: "powerpc64le-linux-gnu-", defconfig: "allmodconfig" }

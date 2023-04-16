@@ -4,6 +4,9 @@ name: powerpc/extrawarn
 on:
   # Only when triggered manually via the github UI.
   workflow_dispatch:
+  push:
+    branches:
+      - 'kernelci-*'
 
 jobs:
   kernel:

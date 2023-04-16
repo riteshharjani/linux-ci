@@ -5,21 +5,21 @@ on:
   # This allows the build to be triggered manually via the github UI.
   workflow_dispatch:
 
-  push:
-    # This triggers the build on a push to any branch
-    branches:
-    - '**'
-    # As long as one of these paths matches
-    paths:
-      # Only build if perf or other pieces it uses have been modified
-      - 'tools/perf/**'
-      - 'tools/arch/**'
-      - 'tools/build/**'
-      - 'tools/include/**'
-      - 'tools/lib/**'
-      - 'tools/scripts/**'
-      # Change to workflow triggers a build
-      - '.github/workflows/powerpc-perf.yml'
+          #  push:
+          #    # This triggers the build on a push to any branch
+          #    branches:
+          #    - '**'
+          #    # As long as one of these paths matches
+          #    paths:
+          #      # Only build if perf or other pieces it uses have been modified
+          #      - 'tools/perf/**'
+          #      - 'tools/arch/**'
+          #      - 'tools/build/**'
+          #      - 'tools/include/**'
+          #      - 'tools/lib/**'
+          #      - 'tools/scripts/**'
+          #      # Change to workflow triggers a build
+          #      - '.github/workflows/powerpc-perf.yml'
 
 jobs:
   perf:

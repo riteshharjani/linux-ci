@@ -4,19 +4,22 @@ name: powerpc/ppctests
 on:
   # This allows the build to be triggered manually via the github UI.
   workflow_dispatch:
-
   push:
-    # This triggers the build on a push to any branch
     branches:
-    - '**'
-    # As long as one of these paths matches
-    paths:
-      # Generic selftests changes might affect us so match all of selftests
-      - 'tools/testing/selftests/**'
-      # Some files in arch are symlinked by selftests
-      - 'arch/powerpc/**'
-      # Change to workflow triggers a build
-      - '.github/workflows/powerpc-ppctests.yml'
+      - 'kernelci-*'
+
+          #  push:
+          #    # This triggers the build on a push to any branch
+          #    branches:
+          #    - '**'
+          #    # As long as one of these paths matches
+          #    paths:
+          #      # Generic selftests changes might affect us so match all of selftests
+          #      - 'tools/testing/selftests/**'
+          #      # Some files in arch are symlinked by selftests
+          #      - 'arch/powerpc/**'
+          #      # Change to workflow triggers a build
+          #      - '.github/workflows/powerpc-ppctests.yml'
 
 jobs:
   ppctests:
