@@ -1,0 +1,43 @@
+name: xfstests workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      wd_all:
+        description: 'Run for all filesystems'
+        required: true
+        default: false
+      wd_ext2:
+        description: 'Run ext2 filesystems'
+        required: true
+        default: false
+      wd_ext4:
+        description: 'Run ext4 filesystems'
+        required: true
+        default: false
+      wd_xfs:
+        description: 'Run xfs filesystems'
+        required: true
+        default: false
+      wd_btrfs:
+        description: 'Run btrfs filesystems'
+        required: true
+        default: false
+      auto:
+        description: 'Run -g auto? (by default it runs quick)'
+        required: true
+        default: false
+jobs:
+  run_tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        fs: ['ext2', 'ext4', 'xfs', 'btrfs']
+        config: ['1k', '4k', '1k_auto', '4k_auto']
+
+    steps:
+      - name: Run tests
+        if: (github.event.inputs.fs == 'all' || github.event.inputs.fs == matrix.fs) &&
+            ((github.event.inputs.auto == 'auto' && matrix.config.endsWith('_auto')) ||
+            (github.event.inputs.auto == 'quick' && matrix.config.endsWith('_auto') != true))
+        run: echo "Testing ${{ matrix.fs }} with {{ matrix.config }}"
