@@ -23,6 +23,10 @@ on:
         description: 'Run btrfs filesystems'
         required: true
         default: false
+      auto:
+        description: 'Run -g auto? (by default it runs quick)'
+        required: true
+        default: false
                 #  push:
                 #      branches:
                 #        - 'fsci-*'
@@ -103,7 +107,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        config: ["1k", "4k"]
+        config: ${{ github.event.inputs.auto == 'true' ? ['1k_auto', '4k_auto'] : ['1k', '4k'] }}
     steps:
         # ensure you start clean
       - name: Clean up github workspace
