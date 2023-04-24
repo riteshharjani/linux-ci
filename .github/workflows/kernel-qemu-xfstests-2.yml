@@ -107,7 +107,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        config: ${{ github.event.inputs.auto == 'true' ? ['1k_auto', '4k_auto'] : ['1k', '4k'] }}
+        config: ['1k', '4k']
     steps:
         # ensure you start clean
       - name: Clean up github workspace
