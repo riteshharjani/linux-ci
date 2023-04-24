@@ -23,13 +23,13 @@ on:
         description: 'Run btrfs filesystems'
         required: true
         default: false
-  push:
-      branches:
-        - 'fsci-*'
-        - 'kernelci-*'
-      paths:
-        - 'fs/**'
-        - 'include/linux/fs*'
+                #  push:
+                #      branches:
+                #        - 'fsci-*'
+                #        - 'kernelci-*'
+                #      paths:
+                #        - 'fs/**'
+                #        - 'include/linux/fs*'
 
 permissions:
   contents: read
