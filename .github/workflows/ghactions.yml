@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Run tests
-        if: (github.event.inputs.fs == 'all' || github.event.inputs.fs == matrix.fs) &&
+        if: ((github.event.inputs.fs == 'all' || github.event.inputs.fs == matrix.fs) &&
             ((github.event.inputs.auto == 'auto' && matrix.config.endsWith('_auto')) ||
-            (github.event.inputs.auto == 'quick' && matrix.config.endsWith('_auto') != true))
+            (github.event.inputs.auto == 'quick' && matrix.config.endsWith('_auto') != true)))
         run: echo "Testing ${{ matrix.fs }} with {{ matrix.config }}"
