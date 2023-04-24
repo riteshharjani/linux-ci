@@ -27,6 +27,9 @@ on:
       branches:
         - 'fsci-*'
         - 'kernelci-*'
+      paths:
+        - 'fs/**'
+        - 'include/linux/fs*'
 
 permissions:
   contents: read
@@ -43,7 +46,6 @@ jobs:
       in_ext4: ${{ steps.check_paths.outputs.in_ext4 }}
       in_xfs: ${{ steps.check_paths.outputs.in_xfs }}
       in_btrfs: ${{ steps.check_paths.outputs.in_btrfs }}
-      fs_generic: ${{ steps.set_fs_generic.outputs.fs_generic }}
     steps:
       - name: Checks out repo
         if: ${{ !(github.event.inputs.wd_all || github.event.inputs.wd_ext2 || github.event.inputs.wd_ext4 || github.event.wd_xfs || github.event.wd_btrfs) }}
@@ -62,24 +64,9 @@ jobs:
               - 'fs/xfs/**'
             in_btrfs:
               - 'fs/btrfs/**'
-            in_fs:
-              - 'fs/**'
-            in_include:
-              - 'include/linux/fs.h'
-      - name: Set fs_generic flag
-        if: ${{ !(github.event.inputs.wd_all || github.event.inputs.wd_ext2 || github.event.inputs.wd_ext4 || github.event.wd_xfs || github.event.wd_btrfs) }}
-        id: set_fs_generic
-        run: |
-          if [[ ("${{ steps.check_paths.outputs.in_include }}" == "true" || "${{ steps.check_paths.outputs.in_fs }}" == "true") && "${{ steps.check_paths.outputs.in_ext2 }}" != "true" && "${{ steps.check_paths.outputs.in_ext4 }}" != "true" && "${{ steps.check_paths.outputs.in_xfs }}" != "true" && "${{ steps.check_paths.outputs.in_btrfs }}" != "true" ]]; then
-            echo "fs_generic=true" >> $GITHUB_ENV
-            echo "::set-output name=fs_generic::true"
-          else
-            echo "fs_generic=false" >> $GITHUB_ENV
-            echo "::set-output name=fs_generic::false"
-          fi
   build_kernel:
     needs: check_changes
-    if: ${{ (needs.check_changes.outputs.fs_generic || needs.check_changes.outputs.in_ext2 || needs.check_changes.outputs.in_ext4 || needs.check_changes.outputs.in_xfs ||  needs.check_changes.outputs.in_btrfs) || (github.event.inputs.wd_all || github.event.inputs.wd_ext2 || github.event.inputs.wd_ext4 || github.event.inputs.wd_xfs || github.event.inputs.wd_btrfs)  }}
+    if: ${{ (needs.check_changes.outputs.in_ext2 || needs.check_changes.outputs.in_ext4 || needs.check_changes.outputs.in_xfs ||  needs.check_changes.outputs.in_btrfs) || (github.event.inputs.wd_all || github.event.inputs.wd_ext2 || github.event.inputs.wd_ext4 || github.event.inputs.wd_xfs || github.event.inputs.wd_btrfs)  }}
     runs-on: self-hosted
     steps:
     - name: Check out repository
@@ -112,7 +99,7 @@ jobs:
           vmlinux
   ext2_tests:
     needs: build_kernel
-    if: ${{ needs.check_changes.outputs.in_ext2 == 'true' || needs.check_changes.outputs.fs_generic == 'true'  || github.event.inputs.wd_ext2 || github.event.inputs.wd_all }}
+    if: ${{ needs.check_changes.outputs.in_ext2 == 'true' || github.event.inputs.wd_ext2 || github.event.inputs.wd_all }}
     runs-on: self-hosted
     strategy:
       matrix:
@@ -204,7 +191,7 @@ jobs:
 
   ext4_tests:
     needs: build_kernel
-    if: ${{ needs.check_changes.outputs.in_ext4 == 'true' || needs.check_changes.outputs.fs_generic == 'true' || github.event.inputs.wd_ext4 || github.event.inputs.wd_all }}
+    if: ${{ needs.check_changes.outputs.in_ext4 == 'true' || github.event.inputs.wd_ext4 || github.event.inputs.wd_all }}
     runs-on: self-hosted
     strategy:
       matrix:
@@ -296,7 +283,7 @@ jobs:
 
   xfs_tests:
     needs: build_kernel
-    if: ${{ needs.check_changes.outputs.in_xfs == 'true' || needs.check_changes.outputs.fs_generic == 'true' || github.event.inputs.wd_xfs || github.event.inputs.wd_all }}
+    if: ${{ needs.check_changes.outputs.in_xfs == 'true' || github.event.inputs.wd_xfs || github.event.inputs.wd_all }}
     runs-on: self-hosted
     strategy:
       matrix:
@@ -388,7 +375,7 @@ jobs:
 
   btrfs_tests:
     needs: build_kernel
-    if: ${{ needs.check_changes.outputs.in_btrfs == 'true' || needs.check_changes.outputs.fs_generic == 'true' || github.event.inputs.wd_btrfs || github.event.inputs.wd_all }}
+    if: ${{ needs.check_changes.outputs.in_btrfs == 'true' || github.event.inputs.wd_btrfs || github.event.inputs.wd_all }}
     runs-on: self-hosted
     strategy:
       matrix:
