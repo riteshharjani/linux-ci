@@ -4,6 +4,10 @@ name: powerpc/extrawarn
 on:
   # Only when triggered manually via the github UI.
   workflow_dispatch:
+  push:
+    # This triggers the build on a push to any branch
+    branches:
+    - '**'
 
 jobs:
   kernel:
