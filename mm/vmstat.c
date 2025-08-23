@@ -1429,6 +1429,11 @@ const char * const vmstat_text[] = {
 	"direct_map_level2_splits",
 	"direct_map_level3_splits",
 #endif
+#ifdef CONFIG_PPC_BOOK3S_64
+	"slb_kernel_faults",
+	"slb_user_faults",
+#endif
+
 #ifdef CONFIG_PER_VMA_LOCK_STATS
 	"vma_lock_success",
 	"vma_lock_abort",
