@@ -828,9 +828,11 @@ static void check_mm(struct mm_struct *mm)
 				 mm, resident_page_types[i], x);
 	}
 
-	if (mm_pgtables_bytes(mm))
+	if (mm_pgtables_bytes(mm)) {
 		pr_alert("BUG: non-zero pgtables_bytes on freeing mm: %ld\n",
 				mm_pgtables_bytes(mm));
+		BUG_ON(1);
+	}
 
 #if defined(CONFIG_TRANSPARENT_HUGEPAGE) && !USE_SPLIT_PMD_PTLOCKS
 	VM_BUG_ON_MM(mm->pmd_huge_pte, mm);

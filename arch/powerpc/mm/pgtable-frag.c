@@ -122,7 +122,12 @@ void pte_fragment_free(unsigned long *table, int kernel)
 	if (pagetable_is_reserved(ptdesc))
 		return free_reserved_ptdesc(ptdesc);
 
-	BUG_ON(atomic_read(&ptdesc->pt_frag_refcount) <= 0);
+	if (atomic_read(&ptdesc->pt_frag_refcount) <= 0) {
+		pr_crit("%s: refcnt=%d ptdesc=%pK, table=%pK\n", __func__,
+				atomic_read(&ptdesc->pt_frag_refcount),
+				ptdesc, table);
+		BUG_ON(1);
+	}
 	if (atomic_dec_and_test(&ptdesc->pt_frag_refcount)) {
 		if (kernel)
 			pagetable_free(ptdesc);
