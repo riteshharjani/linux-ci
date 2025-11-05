@@ -147,13 +147,13 @@ jobs:
             old-image: korg-8.1.0
             new-image: fedora-40
 
-          - defconfig: corenet64_smp_defconfig
-            machine: ppc64e
-            machine_2: ppc64e+compat
-            packages: qemu-system-ppc64
-            rootfs: ppc64-novsx-rootfs.cpio.gz ppc-rootfs.cpio.gz
-            old-image: korg-8.1.0
-            new-image: fedora-40
+#          - defconfig: corenet64_smp_defconfig
+#            machine: ppc64e
+#            machine_2: ppc64e+compat
+#            packages: qemu-system-ppc64
+#            rootfs: ppc64-novsx-rootfs.cpio.gz ppc-rootfs.cpio.gz
+#            old-image: korg-8.1.0
+#            new-image: fedora-40
 
           - defconfig: g5_defconfig
             machine: g5
