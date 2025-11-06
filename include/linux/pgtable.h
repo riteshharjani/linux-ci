@@ -7,6 +7,7 @@
 
 #define PMD_ORDER	(PMD_SHIFT - PAGE_SHIFT)
 #define PUD_ORDER	(PUD_SHIFT - PAGE_SHIFT)
+#define P4D_ORDER	(P4D_SHIFT - PAGE_SHIFT)
 
 #ifndef __ASSEMBLY__
 #ifdef CONFIG_MMU
