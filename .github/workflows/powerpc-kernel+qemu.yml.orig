@@ -166,6 +166,7 @@ jobs:
             machine: mac99
             packages: qemu-system-ppc openbios-ppc
             rootfs: ppc-rootfs.cpio.gz
+            old-image: korg-8.1.0
             new-image: fedora-40
 
     steps:
@@ -203,12 +204,10 @@ jobs:
     - uses: actions/download-artifact@v4
       with:
         name: ${{ matrix.defconfig }}-${{ matrix.old-image }}
-      if: matrix.old-image != ''
 
     - name: Run qemu-${{ matrix.machine }} with ${{ matrix.old-image }} build kernel
       run: ./scripts/boot/qemu-${{ matrix.machine }}
-      if: matrix.old-image != ''
 
     - name: Run qemu-${{ matrix.machine_2 }} with ${{ matrix.old-image }} build kernel
       run: ./scripts/boot/qemu-${{ matrix.machine_2 }}
-      if: matrix.machine_2 != '' && matrix.old-image != ''
+      if: matrix.machine_2 != ''
