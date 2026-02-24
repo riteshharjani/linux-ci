@@ -36,12 +36,6 @@
 #define __type_min(T) ((T)((T)-type_max(T)-(T)1))
 #define type_min(t)	__type_min(typeof(t))
 
-/*
- * Avoids triggering -Wtype-limits compilation warning,
- * while using unsigned data types to check a < 0.
- */
-#define is_non_negative(a) ((a) > 0 || (a) == 0)
-#define is_negative(a) (!(is_non_negative(a)))
 
 /*
  * Allows for effectively applying __must_check to a macro so we can have
@@ -201,9 +195,9 @@ static inline bool __must_check __must_check_overflow(bool overflow)
 	typeof(d) _d = d;						\
 	unsigned long long _a_full = _a;				\
 	unsigned int _to_shift =					\
-		is_non_negative(_s) && _s < 8 * sizeof(*d) ? _s : 0;	\
+		_s >= 0 && _s < 8 * sizeof(*d) ? _s : 0;		\
 	*_d = (_a_full << _to_shift);					\
-	(_to_shift != _s || is_negative(*_d) || is_negative(_a) ||	\
+	(_to_shift != _s || *_d < 0 || _a < 0 ||			\
 	(*_d >> _to_shift) != _a);					\
 }))
 
@@ -576,7 +570,7 @@ static inline size_t __must_check size_sub(size_t minuend, size_t subtrahend)
  * @FAM is not annotated with __counted_by(), always returns true.
  */
 #define overflows_flex_counter_type(TYPE, FAM, COUNT)		\
-	(!overflows_type(COUNT, typeof_flex_counter(((TYPE *)NULL)->FAM)))
+	(overflows_type(COUNT, typeof_flex_counter(((TYPE *)NULL)->FAM)))
 
 /**
  * __set_flex_counter() - Set the counter associated with the given flexible
