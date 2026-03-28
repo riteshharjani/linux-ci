@@ -1,0 +1,131 @@
+name: powerpc/kunit
+
+# Build a ppc64le guest kernel with CONFIG_KUNIT_ALL_TESTS=y, boot in QEMU
+# TCG, and verify that no built-in KUnit tests report failures in dmesg KTAP
+# output.
+#
+# Two variants are tested:
+#   standard  - KUnit all built-ins; kfence sample reports are filtered by
+#               ci-scripts etc/filters.ini so they don't trip the scanner.
+#   kfence    - Same kernel; additionally loads the kfence_test module
+#               explicitly under ignore_warnings() to capture module-based
+#               kfence KUnit tests.
+#
+# NOTE: The run job uses linuxppc/ci-scripts for the boot infrastructure.
+# If you have local ci-scripts changes (e.g. run_kunit_builtin callback or
+# updated filters.ini), push them to that repo before enabling CI runs.
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+    - '**'
+    paths:
+      - 'lib/kunit/**'
+      - 'mm/kfence/**'
+      - 'mm/**'
+      - 'arch/powerpc/**'
+      - '.github/workflows/powerpc-kunit.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      ARCH: powerpc
+      TARGET: kernel
+      CCACHE: 1
+      MODULES: 1
+      SUBARCH: ppc64le
+      IMAGE: fedora-42
+      DEFCONFIG: ppc64le_guest_defconfig
+      # Enable all KUnit built-in tests on top of the guest defconfig.
+      # kunit-ci.config lives in arch/powerpc/configs/ within this tree.
+      MERGE_CONFIG: /linux/arch/powerpc/configs/kunit-ci.config
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Register problem matchers
+      run: |
+        echo "::add-matcher::.github/problem-matchers/compiler-source.json"
+        echo "::add-matcher::.github/problem-matchers/compiler-non-source.json"
+
+    - name: Load ccache
+      uses: actions/cache@v4
+      with:
+        path: ~/.ccache
+        key: ${{ env.IMAGE }}-${{ env.SUBARCH }}-${{ env.DEFCONFIG }}-kunit
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build kernel with KUnit
+      run: |
+        mkdir -p ~/.ccache
+        ./arch/powerpc/tools/ci-build.sh
+
+    - name: Archive kernel artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: kernel-ppc64le-kunit
+        path: |
+          ~/output/vmlinux
+          ~/output/.config
+          ~/output/System.map
+          ~/output/modules.tar.gz
+          ~/output/arch/powerpc/boot/zImage
+          ~/output/include/config/kernel.release
+
+  run-kunit:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: linuxppc/ci-scripts
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: APT update
+      run: sudo apt-get update
+
+    - name: Install QEMU and pexpect
+      run: sudo apt-get install -y qemu-system-ppc64 python3-pexpect python3-termcolor python3-yaml
+
+    - name: Download root disk
+      run: make -C root-disks ppc64le-rootfs.cpio.gz
+
+    - name: Download kernel artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: kernel-ppc64le-kunit
+
+    # Boot 1: standard KUnit built-ins.
+    # run_kunit_builtin greps dmesg for "not ok" lines (excluding SKIP).
+    # kfence sample reports are suppressed by etc/filters.ini, so genuine
+    # kfence violations show up but periodic sampling noise does not.
+    - name: Run built-in KUnit tests (pseries p10 TCG)
+      run: |
+        ./scripts/boot/qemu-pseries+p10+tcg \
+          --callback run_kunit_builtin
+
+    # Boot 2: explicitly load kfence_test module under ignore_warnings().
+    # This catches kfence_test when it was built as a module rather than
+    # built-in, and suppresses the intentional kfence violations it triggers.
+    - name: Run kfence_test module + KUnit check (pseries p10 TCG)
+      run: |
+        ./scripts/boot/qemu-pseries+p10+tcg \
+          --callback "run_kunit_modules(kfence_test)" \
+          --callback run_kunit_builtin

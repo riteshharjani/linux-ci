@@ -1,0 +1,207 @@
+name: powerpc/run-selftests
+
+# Build a ppc64le guest kernel with MM selftest Kconfig requirements and
+# selftests binaries, then boot in QEMU TCG and run the mm and powerpc
+# selftest collections via run_kselftest.sh.
+#
+# NOTE: The run job uses linuxppc/ci-scripts for the boot infrastructure.
+# If you have local changes to ci-scripts (e.g. new callbacks or filters),
+# push them to that repo before enabling this workflow in CI.
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+    - '**'
+    paths:
+      - 'tools/testing/selftests/**'
+      - 'arch/powerpc/**'
+      - 'mm/**'
+      - '.github/workflows/powerpc-run-selftests.yml'
+
+jobs:
+  build-kernel:
+    runs-on: ubuntu-latest
+
+    env:
+      ARCH: powerpc
+      TARGET: kernel
+      CCACHE: 1
+      MODULES: 1
+      SUBARCH: ppc64le
+      IMAGE: fedora-42
+      DEFCONFIG: ppc64le_guest_defconfig
+      # Merge MM selftest Kconfig requirements on top of the guest defconfig.
+      MERGE_CONFIG: /linux/tools/testing/selftests/mm/config
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Register problem matchers
+      run: |
+        echo "::add-matcher::.github/problem-matchers/compiler-source.json"
+        echo "::add-matcher::.github/problem-matchers/compiler-non-source.json"
+
+    - name: Load ccache
+      uses: actions/cache@v4
+      with:
+        path: ~/.ccache
+        key: ${{ env.IMAGE }}-${{ env.SUBARCH }}-${{ env.DEFCONFIG }}-selftests
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build kernel
+      run: |
+        mkdir -p ~/.ccache
+        ./arch/powerpc/tools/ci-build.sh
+
+    - name: Archive kernel artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: kernel-ppc64le-selftests
+        path: |
+          ~/output/vmlinux
+          ~/output/.config
+          ~/output/System.map
+          ~/output/modules.tar.gz
+          ~/output/arch/powerpc/boot/zImage
+          ~/output/include/config/kernel.release
+
+  build-selftests:
+    runs-on: ubuntu-latest
+
+    env:
+      ARCH: powerpc
+      TARGET: selftests
+      INSTALL: 1
+      SUBARCH: ppc64le
+      IMAGE: ubuntu-24.04
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Register problem matchers
+      run: |
+        echo "::add-matcher::.github/problem-matchers/compiler-source.json"
+        echo "::add-matcher::.github/problem-matchers/compiler-non-source.json"
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build selftests
+      run: |
+        mkdir -p ~/output
+        ./arch/powerpc/tools/ci-build.sh
+
+    - name: Package selftests tarball
+      run: |
+        cd ~/output
+        mv install selftests
+        tar -czf selftests.tar.gz selftests
+
+    - name: Archive selftests tarball
+      uses: actions/upload-artifact@v4
+      with:
+        name: selftests-ppc64le
+        path: ~/output/selftests.tar.gz
+
+  build-ppctests:
+    runs-on: ubuntu-latest
+
+    env:
+      ARCH: powerpc
+      TARGET: ppctests
+      INSTALL: 1
+      SUBARCH: ppc64le
+      IMAGE: ubuntu-24.04
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build ppctests
+      run: |
+        mkdir -p ~/output
+        ./arch/powerpc/tools/ci-build.sh
+
+    - name: Package ppctests tarball
+      run: |
+        cd ~/output
+        mv install selftests
+        tar -czf selftests.tar.gz selftests
+
+    - name: Archive ppctests tarball
+      uses: actions/upload-artifact@v4
+      with:
+        name: ppctests-ppc64le
+        path: ~/output/selftests.tar.gz
+
+  run-selftests:
+    runs-on: ubuntu-latest
+    needs: [build-kernel, build-selftests, build-ppctests]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: linuxppc/ci-scripts
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: APT update
+      run: sudo apt-get update
+
+    - name: Install QEMU and pexpect
+      run: sudo apt-get install -y qemu-system-ppc64 python3-pexpect python3-termcolor python3-yaml
+
+    - name: Download root disk
+      run: make -C root-disks ppc64le-rootfs.cpio.gz
+
+    - name: Download kernel artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: kernel-ppc64le-selftests
+
+    - name: Download selftests tarball
+      uses: actions/download-artifact@v4
+      with:
+        name: selftests-ppc64le
+        path: selftests-mm
+
+    - name: Download ppctests tarball
+      uses: actions/download-artifact@v4
+      with:
+        name: ppctests-ppc64le
+        path: selftests-ppc
+
+    - name: Run mm selftests in QEMU (pseries p10 TCG)
+      run: |
+        ./scripts/boot/qemu-pseries+p10+tcg \
+          --selftests-path selftests-mm/selftests.tar.gz \
+          --callback "run_selftest_collections(mm)"
+
+    - name: Run powerpc selftests in QEMU (pseries p10 TCG)
+      run: |
+        ./scripts/boot/qemu-pseries+p10+tcg \
+          --selftests-path selftests-ppc/selftests.tar.gz \
+          --callback "run_selftest_collections(powerpc.*)"
