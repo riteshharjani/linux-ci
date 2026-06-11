@@ -162,6 +162,9 @@ static int elan_get_fwinfo(u16 ic_type, u8 iap_version, u16 *validpage_count,
 	case 0x15:
 		*validpage_count = 1024;
 		break;
+	case 0x19:
+		*validpage_count = 2032;
+		break;
 	default:
 		/* unknown ic type clear value */
 		*validpage_count = 0;
@@ -643,6 +646,11 @@ static ssize_t elan_sysfs_update_fw(struct device *dev,
 	if (error) {
 		dev_err(dev, "failed to request firmware: %d\n", error);
 		return error;
+	}
+
+	if (fw->size < data->fw_signature_address + sizeof(signature)) {
+		dev_err(dev, "firmware file too small\n");
+		return -EBADF;
 	}
 
 	/* Firmware file must match signature data */
@@ -1399,7 +1407,7 @@ err:
 static DEFINE_SIMPLE_DEV_PM_OPS(elan_pm_ops, elan_suspend, elan_resume);
 
 static const struct i2c_device_id elan_id[] = {
-	{ DRIVER_NAME },
+	{ .name = DRIVER_NAME },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, elan_id);

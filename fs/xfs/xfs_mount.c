@@ -1080,7 +1080,7 @@ xfs_mountfs(
 
 	if (XFS_IS_CORRUPT(mp, !S_ISDIR(VFS_I(rip)->i_mode))) {
 		xfs_warn(mp, "corrupted root inode %llu: not a directory",
-			(unsigned long long)rip->i_ino);
+			(unsigned long long)I_INO(rip));
 		xfs_iunlock(rip, XFS_ILOCK_EXCL);
 		error = -EFSCORRUPTED;
 		goto out_rele_rip;
@@ -1149,9 +1149,12 @@ xfs_mountfs(
 	 * blocks.
 	 */
 	error = xfs_fs_reserve_ag_blocks(mp);
-	if (error && error == -ENOSPC)
+	if (error) {
+		if (error != -ENOSPC)
+			goto out_rtunmount;
 		xfs_warn(mp,
-	"ENOSPC reserving per-AG metadata pool, log recovery may fail.");
+"ENOSPC reserving per-AG metadata pool, log recovery may fail.");
+	}
 	error = xfs_log_mount_finish(mp);
 	xfs_fs_unreserve_ag_blocks(mp);
 	if (error) {
