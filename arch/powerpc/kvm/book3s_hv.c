@@ -1159,6 +1159,10 @@ static long kvmppc_h_rpt_invalidate(struct kvm_vcpu *vcpu,
 	return H_SUCCESS;
 }
 
+/*
+ * Must be called with preemption disabled. The HPT hcall handlers spin
+ * on HPTE bit-locks and cannot make any blocking/sleeping calls.
+ */
 static long kvmppc_pseries_do_hpt_hcall(struct kvm_vcpu *vcpu, unsigned long req)
 {
 	switch (req) {
